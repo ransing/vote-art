@@ -102,4 +102,10 @@
 			usePopupNav: true
 		});
 
-})(jQuery);
+	})(jQuery);
+	let caption = document.querySelector('.caption')
+	const removeCaption = () => {
+		caption.remove()
+	}
+	
+	removeCaption()
