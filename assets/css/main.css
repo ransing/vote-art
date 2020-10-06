@@ -1689,7 +1689,7 @@ input, select, textarea {
 		}
 
 	form textarea {
-		min-height: 12em;
+		min-height: 7em;
 	}
 
 	form ::-webkit-input-placeholder {
