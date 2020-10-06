@@ -1825,7 +1825,7 @@ input, select, textarea {
 		}
 
 		.box:before {
-			/* content: " (" attr(href) ") "; */
+			content: "";
 			display: block;
 			width: 90px;
 			height: 66px;
@@ -1860,7 +1860,7 @@ input, select, textarea {
 					position: absolute;
 					top: 0;
 					height: 100%;
-					width: auto;
+					width: 100%;
 				}
 
 			.box.style1 .inner > :last-child {
