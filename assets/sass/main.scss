@@ -127,12 +127,12 @@
 		}
 
 		//! Stops initial animations until page loads. Changed it recently but didnt work
-			&.is-preload {
-				*, *:before, *:after {
-					@include vendor('animation', 'none !important');
-					@include vendor('transition', 'none !important');
-				}
-			}
+			// &.is-preload {
+			// 	*, *:before, *:after {
+			// 		@include vendor('animation', 'none !important');
+			// 		@include vendor('transition', 'none !important');
+			// 	}
+			// }
 
 	}
 
@@ -850,7 +850,7 @@
 		}
 
 		body.is-preload & {
-			opacity: 0;
+			opacity: 1;
 
 			footer {
 				@include vendor('transform', 'translateY(1em)');

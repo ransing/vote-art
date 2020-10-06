@@ -7,6 +7,24 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
+@keyframes fade {
+	0%   {opacity: 0;}
+	50%  {opacity: 0.5;}
+	100% {opacity: 1;}
+  }
+
+  #rainbow-h1 {
+	  animation-name: fade !important;
+	  animation-duration: 2s !important;
+	  animation-timing-function: linear !important;
+  }
+
+  footer {
+	animation-name: fade !important;
+	animation-duration: 2s !important;
+	animation-timing-function: linear !important;
+  }
+
 html, body, div, span, applet, object,
 iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
 pre, a, abbr, acronym, address, big, cite,
@@ -2072,17 +2090,18 @@ input, select, textarea {
 				background: url("images/arrow.svg") no-repeat;
 			}
 
-		body.is-preload #header {
-			opacity: 0;
-		}
+		/* body.is-preload #header { */
+			/* opacity: 0;  */
+			/* originally 0 */
+		/* } */
 
-			body.is-preload #header footer {
+			/* body.is-preload #header footer {
 				-moz-transform: translateY(1em);
 				-webkit-transform: translateY(1em);
 				-ms-transform: translateY(1em);
 				transform: translateY(1em);
 				opacity: 0;
-			}
+			} */
 
 /* Banner */
 

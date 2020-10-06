@@ -37,6 +37,14 @@
 			}, 100);
 		});
 
+		// $window.on('load', function() {
+		// 	let header = document.getElementById('rainbow-h1')
+		// 	window.setTimeout(function() {
+		// 		header.classList.remove('is-preload');
+		// 	}, 10);
+		// 	console.log('hello')
+		// });
+
 	// Scrolly.
 		$('.scrolly-middle').scrolly({
 			speed: 1000,
