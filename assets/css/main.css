@@ -1825,7 +1825,7 @@ input, select, textarea {
 		}
 
 		.box:before {
-			content: '';
+			/* content: " (" attr(href) ") "; */
 			display: block;
 			width: 90px;
 			height: 66px;
