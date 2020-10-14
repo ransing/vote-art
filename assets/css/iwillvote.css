@@ -1,0 +1,140 @@
+/**
+ * Styles for the I Will Vote voting location lookup widget.
+ */
+/* stylelint-disable rule-empty-line-before */
+
+/**
+ * Any of these color and size variables can be overridden to customize the
+ * appearance of the widget.
+ *
+ * (For the non-modern browsers that don't support CSS variables, the styles
+ * below include duplicated fallback properties.)
+ */
+ #i-will-vote-widget {
+    --widget-width: auto;
+    --base-font-color: #343a40;
+    --base-font-family: sans-serif;
+    --base-font-size: 1rem;
+    --header-font-color: #162577;
+    --label-font-color: #162577;
+    --input-background-color: #fff;
+    --input-border-color: #adb5bd;
+    --input-border-radius: 3px;
+    --input-font-color: #162577;
+    --input-hover-border-color: #6c757d;
+    --button-background-color: #0757c3;
+    --button-border-radius: 3px;
+    --button-font-color: #fff;
+    --button-hover-background-color: #0d43a5;
+    --button-hover-font-color: #fff;
+  }
+  
+  /* Base font and color */
+  .iwv-locate-form {
+    max-width: 600px;
+    width: var(--widget-width);
+    color: #343a40;
+    color: var(--base-font-color);
+    font-family: sans-serif;
+    font-family: var(--base-font-family);
+    font-size: 1rem;
+    font-size: var(--base-font-size);
+    line-height: 1.5;
+    margin: 1.5em auto;
+  }
+  
+  /* Heading size, color, and spacing */
+  .iwv-locate-form__header {
+    color: #162577;
+    color: var(--header-font-color);
+    font-size: 2em;
+    line-height: 1.25;
+    margin: 0.5em 0;
+  }
+  .iwv-locate-form__subheader {
+    font-size: 1.3em;
+    margin: 0.5em 0;
+  }
+  
+  /* Layout for narrow and wide widget sizes */
+  .iwv-locate-form__fields {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin: 0 -0.5em 0.5em;
+  }
+  .iwv-locate-form__fields .iwv-field {
+    margin: 1em 0.5em 0;
+  }
+  .iwv-locate-form__fields--street-address {
+    flex-grow: 100;
+  }
+  .iwv-locate-form__fields--zip {
+    flex-grow: 1;
+    width: 9em;
+  }
+  
+  /* Input field and label styles */
+  .iwv-field__label {
+    color: #162577;
+    color: var(--label-font-color);
+    display: inline-block;
+    font-weight: bold;
+    margin: 0.25em 0;
+    text-transform: uppercase;
+  }
+  .iwv-field--required label::after {
+    content: "\00a0*";
+  }
+  .iwv-field__hint {
+    margin: -0.25em 0 0.25em;
+    opacity: 0.5;
+  }
+  .iwv-field__input {
+    background-color: #fff;
+    background-color: var(--input-background-color);
+    border: 1px solid #adb5bd;
+    border: 1px solid var(--input-border-color);
+    border-radius: 3px;
+    border-radius: var(--input-border-radius);
+    color: #162577;
+    font-family: sans-serif;
+    font-family: var(--base-font-family);
+    font-size: 1.3em;
+    padding: 0.75em;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  .iwv-field__input:hover {
+    border: 1px solid #6c757d;
+    border: 1px solid var(--input-hover-border-color);
+  }
+  
+  /* Button styles */
+  .iwv-button {
+    background-color: #0757c3;
+    background-color: var(--button-background-color);
+    border-radius: 3px;
+    border-radius: var(--button-border-radius);
+    color: #fff;
+    color: var(--button-font-color);
+    cursor: pointer;
+    font-family: sans-serif;
+    font-family: var(--base-font-family);
+    font-size: 1.3em;
+    margin: 1em 0;
+    padding: 0.75em;
+    width: 100%;
+    font-weight: bold;
+    text-align: center;
+    transition: 0.1s;
+    border: 0;
+  }
+  .iwv-button:active,
+  .iwv-button:focus,
+  .iwv-button:hover {
+    background-color: #0d43a5;
+    background-color: var(--button-hover-background-color);
+    color: #fff;
+    color: var(--button-hover-font-color);
+  }

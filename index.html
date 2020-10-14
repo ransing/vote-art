@@ -6,6 +6,21 @@
 -->
 <html>
 	<head>
+			<link href="https://iwillvote.com/locate/widget-v2.css" rel="stylesheet" />
+			<style>
+					#i-will-vote-widget {
+					--base-font-family: 'Arial' !important;
+					--base-font-color:  #abdbff;
+					--label-font-color: rgb(190, 176, 176);
+					--base-font-size: 65%;
+					--header-font-color: #746462;
+					--button-background-color: #8405a3;
+					--button-font-color: #94bbdb;
+					--button-hover-background-color: #97d2ff;
+					--button-hover-font-color: #004378;
+					}
+					</style>
+
 		<title>VOTE </title>
 		<!-- Primary Meta Tags -->
 		<meta name="title" content="VOTE">
@@ -29,7 +44,10 @@
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<link rel="icon" href="assets/css/images/favicon.ico" />
 	<!-- <link rel="manifest" href="/site.webmanifest"> -->
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	<noscript><link​ ​rel​="stylesheet"  href​="assets/css/iwillvote.css" /> </noscript>
+	<link​ ​rel​="stylesheet"  href​="assets/js/iwillvote.js" /> 
+	
 	</head>
 	<body class="is-preload">
 			<a target="_blank" href="https://www.instagram.com/p/CGBhTvuhdPG/?utm_source=ig_web_button_share_sheet" id="insta" class="icon brands fa-instagram fa-2x"><span class="label"></span></a>
@@ -107,14 +125,24 @@
 					<p id="display-info" > <span style="background: #27052c5d">  42" x 30" x 16", 50 lbs </span></p>
 				</div>
 		</article>
+		
 
 		<!-- Portfolio -->
 			<article class="container box style2">
+					
 				<header>
 					<h2 id="display-h2" > <span style="background: #07062ebd">  </span></h2>
-					<p id="display-info" > <span style="background: #72156a4f">  
+					<p id="display-info" > <span style="background: #72156a4f; font-size: 30px">  
 						<!-- <br /> -->
 					<a target="_blank" href="https://iwillvote.com/">When/Where/How to Vote</a> </span></p>
+					<!-- I will vote widget -->
+						<div id="i-will-vote-widget"></div>
+						<script src="https://iwillvote.com/locate/widget-v2.js"></script>
+						<script type="text/javascript">
+						IWillVoteLocationSearch.init();
+						</script>
+					
+​						
 				</header>
 				<div class="inner gallery">
 					<div class="row gtr-0">
@@ -320,6 +348,9 @@
 					<!-- <li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li> -->
 				<!-- </ul> -->
 			</div>
+			<!-- <div>
+					<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQZeSO1Fojh-8tbYzcH4I1SuDgl4ZCNuOUzISX4W9i3XCfJjPTrzfWCIU4lvXL5XU9hDkw6hNJBmqQd/embed?start=true&loop=true&delayms=3000&preview?rm=minimal" frameborder="0" width="760" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="false"></iframe>
+			</div> -->
 		</section>
 
 		<!-- Scripts -->
@@ -331,6 +362,7 @@
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
 			<script src="assets/js/rotateText.js"></script>
+			
 
 	</body>
 </html>
