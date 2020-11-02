@@ -2687,8 +2687,14 @@ input, select, textarea {
 	}
 
 #display-h2{
-	color: white
+	color: white;
 }
+
+#display-hz{
+	color: white;
+	/* text-transform: lowercase; */
+}
+
 
 #display-info{
 	color: whitesmoke
