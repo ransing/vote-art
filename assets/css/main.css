@@ -1923,6 +1923,7 @@ input, select, textarea {
 				background: #f341e34f;
 				padding: 2em 3em 2em 3em;
 				margin: 0;
+				min-width: 500px;
 				border-radius: 40px;
 			}
 
@@ -2423,6 +2424,7 @@ input, select, textarea {
 
 				.box.style2 header {
 					padding: 2em;
+					min-width: 280px;
 				}
 
 				.box.style2 .inner {
