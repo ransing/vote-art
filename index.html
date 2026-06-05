@@ -70,6 +70,10 @@
       background: #06061a;
     }
 
+    @media (max-width: 767px) {
+      #hero { height: 100svh; min-height: 480px; }
+    }
+
     #hero-canvas {
       display: block;
       width: 100%;
@@ -452,23 +456,10 @@
     .instagram-embed-wrap {
       max-width: 540px;
       width: 100%;
-      position: relative;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    /* Faded vignette border — sits above the embed, transparent centre, fades to bg colour */
-    .instagram-embed-wrap::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 16px;
-      box-shadow:
-        inset 0  40px 40px -10px #06061a,
-        inset 0 -40px 40px -10px #06061a,
-        inset  40px 0 40px -10px #06061a,
-        inset -40px 0 40px -10px #06061a;
+      /* Outward shadow in the page background colour — fades the embed into the
+         surrounding background without touching anything inside the frame.      */
+      box-shadow: 0 0 70px 55px #06061a;
+      border-radius: 4px;
     }
 
     /* ===== GALLERY ===== */
@@ -607,6 +598,96 @@
       margin: 0;
     }
 
+    /* ===== RESOURCES ===== */
+    #resources {
+      padding: 80px 1.5rem;
+      background: #07071e;
+    }
+    @media (max-width: 600px) { #resources { padding: 50px 1rem; } }
+
+    .resources-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .resources-heading {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 900;
+      color: #00e5ff;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+      text-shadow: 0 0 28px rgba(0,229,255,0.35);
+    }
+
+    .resources-sub {
+      text-align: center;
+      color: rgba(255,255,255,0.45);
+      font-size: 0.9rem;
+      margin-bottom: 3rem;
+    }
+
+    .resources-category {
+      margin-bottom: 2.5rem;
+    }
+
+    .resources-category-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #ffd700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(255,215,0,0.18);
+    }
+
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .resource-card {
+      background: rgba(0,229,255,0.04);
+      border: 1px solid rgba(0,229,255,0.12);
+      border-radius: 12px;
+      padding: 1.1rem 1.2rem;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .resource-card:hover {
+      border-color: rgba(0,229,255,0.4);
+      background: rgba(0,229,255,0.08);
+      transform: translateY(-2px);
+    }
+
+    .resource-card-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #e0e8ff;
+      margin-bottom: 0.15rem;
+    }
+
+    .resource-card-url {
+      font-size: 0.75rem;
+      color: #00e5ff;
+      margin-bottom: 0.55rem;
+      opacity: 0.8;
+    }
+
+    .resource-card-desc {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.55;
+    }
+
+    .resource-card a {
+      text-decoration: none;
+      display: block;
+      color: inherit;
+    }
+
   </style>
 </head>
 <body>
@@ -735,6 +816,131 @@
           <img src="images/fulls/8.gif" alt="People come and go and walk away" loading="lazy" />
         </a>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================== RESOURCES ===================== -->
+  <div class="section-divider"></div>
+  <section id="resources">
+    <div class="resources-inner">
+      <h2 class="resources-heading">Voting Resources</h2>
+      <p class="resources-sub">Everything you need to register, research, and show up — in one place.</p>
+
+      <div class="resources-category">
+        <div class="resources-category-title">Voter Registration &amp; General Voting</div>
+        <div class="resources-grid">
+          <div class="resource-card">
+            <a href="https://vote.gov" target="_blank" rel="noopener">
+              <div class="resource-card-name">Vote.gov</div>
+              <div class="resource-card-url">vote.gov</div>
+              <div class="resource-card-desc">The U.S. government's official voting portal. Register by mail, online, or in person based on your state. Available in multiple languages — the most authoritative starting point for any voter.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://vote.org" target="_blank" rel="noopener">
+              <div class="resource-card-name">Vote.org</div>
+              <div class="resource-card-url">vote.org</div>
+              <div class="resource-card-desc">The largest nonprofit, nonpartisan voter registration and GOTV platform in America. Register in under 2 minutes, check your status, request an absentee ballot, find your polling place, and verify ID requirements.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://usa.gov/voting-and-elections" target="_blank" rel="noopener">
+              <div class="resource-card-name">USAGov Voting Hub</div>
+              <div class="resource-card-url">usa.gov/voting-and-elections</div>
+              <div class="resource-card-desc">The federal government's comprehensive guide — registration deadlines, absentee and early voting, voter ID rules, sample ballots, and how to find your local election office. All 50 states covered.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="resources-category">
+        <div class="resources-category-title">Ballot &amp; Candidate Research</div>
+        <div class="resources-grid">
+          <div class="resource-card">
+            <a href="https://ballotpedia.org" target="_blank" rel="noopener">
+              <div class="resource-card-name">Ballotpedia</div>
+              <div class="resource-card-url">ballotpedia.org</div>
+              <div class="resource-card-desc">A deep-dive encyclopedia of American elections. Look up every candidate, ballot measure, election policy, redistricting maps, and historical results by state. Completely free and nonpartisan.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://vote411.org" target="_blank" rel="noopener">
+              <div class="resource-card-name">VOTE411</div>
+              <div class="resource-card-url">vote411.org</div>
+              <div class="resource-card-desc">By the League of Women Voters. Enter your address to see your specific ballot, candidate survey responses, polling place info, and registration deadlines. Available in English and Spanish. Served 9.5 million users in 2024.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://turbovote.org" target="_blank" rel="noopener">
+              <div class="resource-card-name">TurboVote</div>
+              <div class="resource-card-url">turbovote.org</div>
+              <div class="resource-card-desc">Sends you text and email reminders for every election — from school board to president. Shows upcoming races, registration status, voter ID rules, and a sample ballot tailored to where you live.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="resources-category">
+        <div class="resources-category-title">Civic Organizations &amp; Community Outreach</div>
+        <div class="resources-grid">
+          <div class="resource-card">
+            <a href="https://lwv.org" target="_blank" rel="noopener">
+              <div class="resource-card-name">League of Women Voters</div>
+              <div class="resource-card-url">lwv.org</div>
+              <div class="resource-card-desc">Founded in 1920, one of America's oldest nonpartisan civic organizations. Voter registration drives, advocacy, litigation to protect voting rights, and public education. 800+ state and local chapters.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://whenweallvote.org" target="_blank" rel="noopener">
+              <div class="resource-card-name">When We All Vote</div>
+              <div class="resource-card-url">whenweallvote.org</div>
+              <div class="resource-card-desc">Co-chaired by Michelle Obama. Focuses on closing the race and age voting gap. Offers a Voter Resources Hub to register, check status, and find polling places. Runs grassroots drives in all 50 states.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://rockthevote.org" target="_blank" rel="noopener">
+              <div class="resource-card-name">Rock the Vote</div>
+              <div class="resource-card-url">rockthevote.org</div>
+              <div class="resource-card-desc">Uses pop culture, music, and digital tools to engage and register young voters ages 18–24. Has registered millions of first-time voters since 1990.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://naacp.org/voting" target="_blank" rel="noopener">
+              <div class="resource-card-name">NAACP Voter Resources</div>
+              <div class="resource-card-url">naacp.org/voting</div>
+              <div class="resource-card-desc">Nonpartisan voter guides and rights advocacy focused on ensuring Black communities and communities of color have full and equal access to the ballot. Covers federal, state, and local races.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="resources-category">
+        <div class="resources-category-title">Official Government Resources</div>
+        <div class="resources-grid">
+          <div class="resource-card">
+            <a href="https://eac.gov/voters/register-and-vote-in-your-state" target="_blank" rel="noopener">
+              <div class="resource-card-name">U.S. Election Assistance Commission</div>
+              <div class="resource-card-url">eac.gov</div>
+              <div class="resource-card-desc">Supports election administration. Provides state-by-state links to election offices, voter registration forms, and information on how to cast a ballot. Up-to-date rules for every state.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://fvap.gov" target="_blank" rel="noopener">
+              <div class="resource-card-name">Federal Voting Assistance Program</div>
+              <div class="resource-card-url">fvap.gov</div>
+              <div class="resource-card-desc">Specifically serves U.S. citizens living overseas, military members, and their families. Helps with overseas voter registration and absentee ballot requests from anywhere in the world.</div>
+            </a>
+          </div>
+          <div class="resource-card">
+            <a href="https://silverstateelections.nv.gov" target="_blank" rel="noopener">
+              <div class="resource-card-name">Nevada Secretary of State</div>
+              <div class="resource-card-url">silverstateelections.nv.gov</div>
+              <div class="resource-card-desc">The official Nevada portal for voter registration, polling places, and mail ballot requests. The direct source for all Nevada-specific voting rules and deadlines.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1122,14 +1328,16 @@
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x06061a);
 
+  /* Desktop z=11: VOTE fills ~140% of viewport width (slight overflow, camera pans to reveal).
+     Mobile  z=7:  VOTE fills ~95% of viewport height — the word is giant, extends off sides.  */
+  const TARGET_Z = isMobile ? 7 : 11;
   const camera = new THREE.PerspectiveCamera(45, heroSection.clientWidth / heroSection.clientHeight, 0.1, 200);
   camera.position.set(0, 0, 50);
-  const TARGET_Z = 17;
 
   const controls = new OrbitControls(camera, canvas);
   controls.enablePan = false;
-  controls.minDistance = 8;
-  controls.maxDistance = 35;
+  controls.enableZoom = false;      // wheel scrolls the PAGE, not the sculpture
+  controls.enableRotate = false;    // rotation is handled by the sine-wave animation
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
 
@@ -1177,31 +1385,28 @@
   }
   mesh.instanceMatrix.needsUpdate = true;
 
-  /* ---- MOUSE / TOUCH ----
-     NDC stored per event; group-local position rebuilt every frame inside animate()
-     so the ripple stays aligned regardless of accumulated auto-rotation.           */
+  /* ---- INPUT ----
+     Desktop: track real mouse NDC.
+     Mobile:  no touch listeners (so single-finger swipe scrolls the page freely);
+              the animate() loop injects an auto-sweep NDC instead.               */
   let mouseNDC = null;
   const raycaster = new THREE.Raycaster();
   const _hit = new THREE.Vector3();
   const _inv = new THREE.Matrix4();
 
-  canvas.addEventListener('mousemove', e => {
-    const r = canvas.getBoundingClientRect();
-    mouseNDC = { x: ((e.clientX - r.left) / r.width) * 2 - 1,
-                 y: -((e.clientY - r.top)  / r.height) * 2 + 1 };
-  });
-  canvas.addEventListener('mouseleave', () => { mouseNDC = null; });
-  canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    const t = e.touches[0], r = canvas.getBoundingClientRect();
-    mouseNDC = { x: ((t.clientX - r.left) / r.width) * 2 - 1,
-                 y: -((t.clientY - r.top)  / r.height) * 2 + 1 };
-  }, { passive: false });
-  canvas.addEventListener('touchend', () => { mouseNDC = null; });
+  if (!isMobile) {
+    canvas.addEventListener('mousemove', e => {
+      const r = canvas.getBoundingClientRect();
+      mouseNDC = { x: ((e.clientX - r.left) / r.width)  * 2 - 1,
+                   y: -((e.clientY - r.top)  / r.height) * 2 + 1 };
+    });
+    canvas.addEventListener('mouseleave', () => { mouseNDC = null; });
+  }
 
   /* ---- ANIMATION ---- */
-  // Springier / bouncier than before: lower damping = more oscillation after touch
-  const SPRING = 130, DAMP = 3.0, MAX_DISP = 3.0, RIPPLE_R = 2.4, RIPPLE_F = 6.0;
+  const SPRING = 130, DAMP = 3.2, MAX_DISP = 3.0,
+        RIPPLE_R = isMobile ? 1.5 : 2.4,
+        RIPPLE_F = isMobile ? 4.0 : 6.0;
   let lastTime = 0, cameraEaseActive = true;
 
   function animate(ts) {
@@ -1235,12 +1440,17 @@
     /* Flush group transforms so matrixWorld is current for this frame */
     group.updateMatrixWorld(true);
 
-    /* Mouse → group-local hit point, recomputed every frame.
-       Use the world Z=0 plane for the ray intersection (simple & reliable),
-       then invert the fresh matrixWorld to get local coords.               */
+    /* Resolve active NDC: real mouse on desktop, auto-sweep on mobile.
+       Mobile sweep: slow left-right sine so screws ripple continuously
+       without needing touch (which would steal page-scroll gestures).  */
+    const activeNDC = isMobile
+      ? { x: Math.sin(time * 0.38) * 0.52, y: Math.sin(time * 0.17) * 0.06 }
+      : mouseNDC;
+
+    /* active NDC → group-local hit, recomputed every frame */
     let mouseLocal = null;
-    if (mouseNDC) {
-      raycaster.setFromCamera(mouseNDC, camera);
+    if (activeNDC) {
+      raycaster.setFromCamera(activeNDC, camera);
       const wPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
       if (raycaster.ray.intersectPlane(wPlane, _hit)) {
         _inv.copy(group.matrixWorld).invert();
@@ -1275,7 +1485,13 @@
 
     if (matrixDirty) mesh.instanceMatrix.needsUpdate = true;
 
-    controls.update();
+    /* Slow left-right camera pan — reveals the parts of the sculpture
+       that extend beyond the viewport edges.
+       Desktop: gentle ±2.5 units.  Mobile: wider ±4 units sweep.    */
+    const panAmt   = isMobile ? 4.0 : 2.5;
+    const panSpeed = isMobile ? 0.19 : 0.11;
+    camera.position.x = Math.sin(time * panSpeed) * panAmt;
+
     renderer.render(scene, camera);
   }
 
