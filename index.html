@@ -1326,7 +1326,7 @@
   renderer.toneMappingExposure = 1.2;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x06061a);
+  scene.background = new THREE.Color(0x010104);
 
   /* Desktop z=11: VOTE fills ~140% of viewport width (slight overflow, camera pans to reveal).
      Mobile  z=7:  VOTE fills ~95% of viewport height — the word is giant, extends off sides.  */
@@ -1374,6 +1374,73 @@
   const group = new THREE.Group();
   group.add(mesh);
   scene.add(group);
+
+  /* ---- PATRIOTIC BACKGROUND PLANE ----
+     A large shader plane sits at z=-15 (well behind the sculpture).
+     Fragment shader draws:
+       • Diagonal stripes in deep crimson / near-black / dark navy cycling slowly
+       • Fine orthogonal grid + 45° hatch lines for the geometric structure
+       • Radial vignette darkens the four edges so the centre stays bright       */
+  const bgMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 } },
+    depthWrite: false,
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+
+      void main() {
+        vec2 uv = vUv;
+
+        /* ---------- diagonal stripes ----------
+           Angle ~18° so stripes run like a subtle flag-draped surface.
+           Three bands per cycle: crimson → black → navy              */
+        float d     = uv.x * 0.951 + uv.y * 0.309; // cos/sin(18°)
+        float cycle = fract(d * 5.0 + uTime * 0.012);
+        float band  = cycle * 3.0;
+
+        vec3 crimson = vec3(0.24, 0.01, 0.04);
+        vec3 navy    = vec3(0.02, 0.04, 0.26);
+        vec3 dark    = vec3(0.02, 0.02, 0.06);
+
+        vec3 col;
+        if (band < 1.0) {
+          col = mix(crimson, dark,   smoothstep(0.65, 1.0, band));
+        } else if (band < 2.0) {
+          float t = band - 1.0;
+          col = mix(dark,    navy,   smoothstep(0.0,  0.35, t));
+          col = mix(col,     dark,   smoothstep(0.65, 1.0,  t));
+        } else {
+          col = mix(dark,    crimson, smoothstep(0.0, 0.35, band - 2.0));
+        }
+
+        /* ---------- geometric grid ---------- */
+        float g  = 38.0;
+        vec2  gv = fract(uv * g);
+        float grid = step(0.94, gv.x) + step(0.94, gv.y);
+        col += min(grid, 1.0) * vec3(0.07, 0.07, 0.14);
+
+        /* ---------- 45° hatch lines (fine texture) ---------- */
+        float hatch = fract((uv.x - uv.y) * g * 1.8);
+        col += step(0.96, hatch) * vec3(0.04, 0.04, 0.09);
+
+        /* ---------- radial vignette ---------- */
+        vec2 v   = (uv - 0.5) * 2.0;
+        float vig = pow(clamp(1.0 - dot(v * 0.62, v * 0.62), 0.0, 1.0), 0.55);
+        col *= vig;
+
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(240, 140), bgMat);
+  bgMesh.position.z = -15;
+  bgMesh.renderOrder = -1;
+  scene.add(bgMesh);
 
   /* ---- INITIALISE ALL MATRICES (one-time pass) ---- */
   const dummy = new THREE.Object3D();
@@ -1423,6 +1490,9 @@
         cameraEaseActive = false;
       }
     }
+
+    /* Tick background shader */
+    bgMat.uniforms.uTime.value = time;
 
     /* Moving headlights sweep across the silver surface */
     const la = time * 0.40;
