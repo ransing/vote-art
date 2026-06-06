@@ -1276,13 +1276,9 @@
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-  /* ---- CANVAS PIXEL SAMPLING ----
-     Wait for fonts so Arial Bold is definitely loaded before sampling pixels.
-     Without this, some mobile browsers render an empty canvas (no glyphs). */
+  /* ---- CANVAS PIXEL SAMPLING ---- */
   const isMobile = window.innerWidth < 768;
   const STEP = isMobile ? 7 : 3;
-
-  await document.fonts.ready;
 
   const offCanvas = document.createElement('canvas');
   offCanvas.width = 900; offCanvas.height = 220;
@@ -1379,12 +1375,11 @@
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(heroSection.clientWidth, heroSection.clientHeight);
-  renderer.setClearColor(0x000000, 0); // transparent canvas — CSS layers show through
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.6;
 
   const scene = new THREE.Scene();
-  scene.background = null;
+  scene.background = new THREE.Color(0x010108); // solid dark — screws always visible
 
   /* Desktop z=11: VOTE fills ~140% of viewport width (slight overflow, camera pans to reveal).
      Mobile  z=7:  VOTE fills ~95% of viewport height — the word is giant, extends off sides.  */
@@ -1439,7 +1434,22 @@
   group.add(mesh);
   scene.add(group);
 
-  // Background is handled entirely by the CSS image — no Three.js plane needed.
+  /* ---- BACKGROUND IMAGE PLANE ----
+     Load the flag image as a Three.js texture so it always renders behind the
+     screws regardless of CSS stacking or canvas transparency.
+     opacity: 0.12 keeps it very faint so silver screws pop strongly.        */
+  new THREE.TextureLoader().load(
+    'images/e7c0d310-4777-4e3a-8a6e-3e7e828614d4.jpg',
+    tex => {
+      const bgMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(260, 160),
+        new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.12 })
+      );
+      bgMesh.position.z = -18;
+      bgMesh.renderOrder = -1;
+      scene.add(bgMesh);
+    }
+  );
 
   /* ---- INITIALISE ALL MATRICES (one-time pass) ---- */
   const dummy = new THREE.Object3D();
