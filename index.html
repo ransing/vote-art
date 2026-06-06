@@ -67,7 +67,21 @@
       height: 100vh;
       min-height: 500px;
       overflow: hidden;
-      background: #06061a;
+      /* Background image — center maintained on all screens.
+         Desktop: 16:9 container, cover crops top/bottom of square image, centre visible.
+         Mobile:  portrait container, cover crops left/right sides, centre visible.     */
+      background: url('images/e7c0d310-4777-4e3a-8a6e-3e7e828614d4.jpg') center/cover no-repeat;
+      background-color: #010104;
+    }
+
+    /* Dark filter over the image — ~60% black so image shows at ~40% opacity */
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      z-index: 0;
+      pointer-events: none;
     }
 
     @media (max-width: 767px) {
@@ -78,6 +92,8 @@
       display: block;
       width: 100%;
       height: 100%;
+      position: relative;
+      z-index: 1;   /* canvas sits above the dark overlay */
     }
 
     #webgl-fallback {
@@ -1287,15 +1303,13 @@
     shaft.translate(0, 0, -0.030);
     parts.push(shaft);
 
-    // Thread ridges (thin washer rings, slightly larger than shaft radius)
-    if (!isMobile) {
-      const threadZs = [-0.02, -0.07, -0.12];
-      for (const tz of threadZs) {
-        const ring = new THREE.CylinderGeometry(0.022, 0.022, 0.005, 10);
-        ring.rotateX(Math.PI / 2);
-        ring.translate(0, 0, tz);
-        parts.push(ring);
-      }
+    // Thread ridges — more rings, wider, more prominent (clearly a screw not a nail)
+    const threadCount = isMobile ? 3 : 6;
+    for (let t = 0; t < threadCount; t++) {
+      const ring = new THREE.CylinderGeometry(0.026, 0.026, 0.007, 10);
+      ring.rotateX(Math.PI / 2);
+      ring.translate(0, 0, -0.02 - t * 0.055);
+      parts.push(ring);
     }
 
     // Pointed tip: ConeGeometry tip at +Y → after rotateX(-PI/2) tip is at -Z (into sign)
@@ -1313,7 +1327,7 @@
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   } catch(e) {
     document.getElementById('webgl-fallback').style.display = 'flex';
     canvas.style.display = 'none';
@@ -1322,11 +1336,12 @@
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(heroSection.clientWidth, heroSection.clientHeight);
+  renderer.setClearColor(0x000000, 0); // transparent — CSS image shows through
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
+  renderer.toneMappingExposure = 1.4;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x010104);
+  scene.background = null; // let the CSS background image show
 
   /* Desktop z=11: VOTE fills ~140% of viewport width (slight overflow, camera pans to reveal).
      Mobile  z=7:  VOTE fills ~95% of viewport height — the word is giant, extends off sides.  */
@@ -1341,35 +1356,62 @@
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
 
-  /* ---- LIGHTS ----
-     Very low ambient → dark areas go near-black (high contrast on dark bg).
-     Three strong directional lights orbit the sculpture, sweeping sharp specular
-     highlights across the mirror-silver screw heads and thread rings so you can
-     pick out individual screws in the formation.                                */
-  scene.add(new THREE.AmbientLight(0xffffff, 0.18));
+  /* ---- LIGHTS ---- */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.45)); // brighter base so all screws are readable
 
-  // Constant soft fill from the front so viewer-facing heads are never pitch-black
-  const fillLight = new THREE.DirectionalLight(0xddeeff, 0.55);
-  fillLight.position.set(0, 3, 20);
+  // Strong constant front fill — every screw head faces viewer and must be clearly lit
+  const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  fillLight.position.set(0, 2, 22);
   scene.add(fillLight);
 
-  // Three strong orbiting headlights
+  // Three powerful orbiting headlights — create moving specular flashes
   const orbitLights = [
-    new THREE.DirectionalLight(0xffffff, 2.8),   // harsh white key
-    new THREE.DirectionalLight(0xbbd4ff, 2.0),   // cool blue rim
-    new THREE.DirectionalLight(0xfff2dd, 1.4),   // warm accent
+    new THREE.DirectionalLight(0xffffff, 4.0),   // main white key
+    new THREE.DirectionalLight(0xaaccff, 3.0),   // cool blue rim
+    new THREE.DirectionalLight(0xffeedd, 2.2),   // warm amber accent
   ];
   orbitLights.forEach(l => scene.add(l));
 
-  /* ---- INSTANCED MESH — pure chrome silver, no vertex colours ---- */
+  /* ---- INSTANCED MESH ----
+     metalness 0.82 / roughness 0.18 = brushed-metal look — every screw visible
+     at all angles, not just direct-reflection angles like a perfect mirror.
+     vertexColors: true lets patriotic color themes tint each screw while the
+     metallic lighting still reads as metal.                                   */
   const geo = buildScrewGeo();
   const mat = new THREE.MeshStandardMaterial({
-    metalness: 0.97,
-    roughness: 0.05,
-    color: 0xeeeeee,
+    metalness: 0.82,
+    roughness: 0.18,
+    color: 0xddddee,
+    vertexColors: true,
   });
   const mesh = new THREE.InstancedMesh(geo, mat, positions.length);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+  // Patriotic color themes — red / white / blue + silver cycling slowly
+  const THEMES = [
+    [[0.82,0.05,0.12],[0.90,0.90,0.94],[0.10,0.18,0.78],[0.90,0.90,0.94]], // US flag
+    [[0.92,0.75,0.05],[0.88,0.88,0.88],[0.72,0.50,0.02],[0.88,0.88,0.88]], // gold/silver
+    [[0.20,0.52,0.95],[0.88,0.88,0.94],[0.60,0.10,0.80],[0.88,0.88,0.94]], // blue/violet
+  ];
+  const SILVER = [0.86, 0.86, 0.90];
+
+  function lerpC(a, b, t) {
+    return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+  }
+
+  function stripeColor(x, y, ti, time) {
+    const th = THEMES[ti];
+    const s  = (((x * 0.20 + y * 0.08 + time * 0.05) % 4) + 4) % 4;
+    const i  = Math.floor(s);
+    const raw = lerpC(th[i], th[(i+1)%4], s - i);
+    return lerpC(raw, SILVER, 0.30); // 30% silver blend keeps metallic feel
+  }
+
+  let themeIdx = 0, themeT = 0;
+
+  // Colour buffer
+  const colorBuf = new Float32Array(positions.length * 3);
+  mesh.instanceColor = new THREE.InstancedBufferAttribute(colorBuf, 3);
 
   const group = new THREE.Group();
   group.add(mesh);
@@ -1434,8 +1476,9 @@
         float vig = pow(clamp(1.0 - dot(v * 0.62, v * 0.62), 0.0, 1.0), 0.55);
         col *= vig;
 
-        gl_FragColor = vec4(col, 1.0);
+        gl_FragColor = vec4(col, 0.72); // semi-transparent — CSS image shows through
       }`,
+    transparent: true,
   });
   const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(240, 140), bgMat);
   bgMesh.position.z = -15;
@@ -1528,7 +1571,12 @@
       }
     }
 
-    /* Per-screw spring physics — matrices updated only when needed */
+    /* Theme cycling every 12 s */
+    themeT += dt / 12;
+    if (themeT >= 1) { themeT -= 1; themeIdx = (themeIdx + 1) % THEMES.length; }
+    const nextTheme = (themeIdx + 1) % THEMES.length;
+
+    /* Per-screw spring physics + colour update */
     let matrixDirty = false;
     for (let i = 0; i < positions.length; i++) {
       const p = positions[i];
@@ -1551,9 +1599,18 @@
         mesh.setMatrixAt(i, dummy.matrix);
         matrixDirty = true;
       }
+
+      // Colour — patriotic stripe cycling
+      const cA = stripeColor(p.x, p.y, themeIdx, time);
+      const cB = stripeColor(p.x, p.y, nextTheme, time);
+      const c  = lerpC(cA, cB, themeT);
+      colorBuf[i*3]   = c[0];
+      colorBuf[i*3+1] = c[1];
+      colorBuf[i*3+2] = c[2];
     }
 
     if (matrixDirty) mesh.instanceMatrix.needsUpdate = true;
+    mesh.instanceColor.needsUpdate = true;
 
     /* Slow left-right camera pan — reveals the parts of the sculpture
        that extend beyond the viewport edges.
