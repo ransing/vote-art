@@ -67,27 +67,26 @@
       height: 100vh;
       min-height: 500px;
       overflow: hidden;
-      background-color: #010104;
+      background-color: #010108;
     }
 
-    /* Layer 1 — background image, 25% darker via brightness filter.
-       center/cover keeps the starburst centre visible on all screen sizes. */
+    /* Layer 1 — background image, very dim (40% brightness) */
     #hero::before {
       content: '';
       position: absolute;
       inset: 0;
       background: url('images/e7c0d310-4777-4e3a-8a6e-3e7e828614d4.jpg') center/cover no-repeat;
-      filter: brightness(0.75);
+      filter: brightness(0.40);
       z-index: 0;
       pointer-events: none;
     }
 
-    /* Layer 2 — dark overlay at 42% (was 62%) — image ~20% more visible than before */
+    /* Layer 2 — heavy dark overlay so image reads at ~12% — nearly black */
     #hero::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.42);
+      background: rgba(0, 0, 6, 0.72);
       z-index: 1;
       pointer-events: none;
     }
@@ -101,7 +100,9 @@
       width: 100%;
       height: 100%;
       position: relative;
-      z-index: 2;   /* canvas above both background layers */
+      z-index: 2;
+      /* Allow vertical scroll on touch — canvas must NOT block page scroll */
+      touch-action: pan-y;
     }
 
     #webgl-fallback {
@@ -1275,10 +1276,13 @@
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-  /* ---- CANVAS PIXEL SAMPLING ---- */
+  /* ---- CANVAS PIXEL SAMPLING ----
+     Wait for fonts so Arial Bold is definitely loaded before sampling pixels.
+     Without this, some mobile browsers render an empty canvas (no glyphs). */
   const isMobile = window.innerWidth < 768;
-  // STEP=3 desktop → ~75% more screws, tighter packing for a dense monumental look
   const STEP = isMobile ? 7 : 3;
+
+  await document.fonts.ready;
 
   const offCanvas = document.createElement('canvas');
   offCanvas.width = 900; offCanvas.height = 220;
@@ -1286,7 +1290,6 @@
   ctx.font = 'bold 170px Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  // Stroke-then-fill thickens each letter stroke by ~22px per side (wider strokes)
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 22;
   ctx.lineJoin = 'round';
@@ -1376,12 +1379,12 @@
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(heroSection.clientWidth, heroSection.clientHeight);
-  renderer.setClearColor(0x000000, 0); // transparent — CSS image shows through
+  renderer.setClearColor(0x000000, 0); // transparent canvas — CSS layers show through
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.4;
+  renderer.toneMappingExposure = 1.6;
 
   const scene = new THREE.Scene();
-  scene.background = null; // let the CSS background image show
+  scene.background = null;
 
   /* Desktop z=11: VOTE fills ~140% of viewport width (slight overflow, camera pans to reveal).
      Mobile  z=7:  VOTE fills ~95% of viewport height — the word is giant, extends off sides.  */
@@ -1389,12 +1392,8 @@
   const camera = new THREE.PerspectiveCamera(45, heroSection.clientWidth / heroSection.clientHeight, 0.1, 200);
   camera.position.set(0, 0, 50);
 
-  const controls = new OrbitControls(camera, canvas);
-  controls.enablePan = false;
-  controls.enableZoom = false;      // wheel scrolls the PAGE, not the sculpture
-  controls.enableRotate = false;    // rotation is handled by the sine-wave animation
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.08;
+  // OrbitControls removed — its constructor adds touch listeners that block page scroll.
+  // All camera movement is handled manually in the animate loop.
 
   /* ---- LIGHTS ----
      Constant front light ensures every screw always has a bright reflection.
