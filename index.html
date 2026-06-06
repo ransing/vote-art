@@ -1277,15 +1277,21 @@
 
   /* ---- CANVAS PIXEL SAMPLING ---- */
   const isMobile = window.innerWidth < 768;
-  const STEP = isMobile ? 8 : 4;
+  // STEP=3 desktop → ~75% more screws, tighter packing for a dense monumental look
+  const STEP = isMobile ? 7 : 3;
 
   const offCanvas = document.createElement('canvas');
   offCanvas.width = 900; offCanvas.height = 220;
   const ctx = offCanvas.getContext('2d');
-  ctx.fillStyle = 'white';
   ctx.font = 'bold 170px Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  // Stroke-then-fill thickens each letter stroke by ~22px per side (wider strokes)
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 22;
+  ctx.lineJoin = 'round';
+  ctx.strokeText('VOTE', 450, 110);
+  ctx.fillStyle = 'white';
   ctx.fillText('VOTE', 450, 110);
   const pixels = ctx.getImageData(0, 0, 900, 220).data;
 
@@ -1311,45 +1317,45 @@
   function buildScrewGeo() {
     const parts = [];
 
-    // Flat head cap (front face, toward viewer)
-    const cap = new THREE.CylinderGeometry(0.040, 0.040, 0.006, 12);
+    // Flat head cap — wider for more visual mass
+    const cap = new THREE.CylinderGeometry(0.052, 0.052, 0.007, 12);
     cap.rotateX(Math.PI / 2);
-    cap.translate(0, 0, 0.122);
+    cap.translate(0, 0, 0.130);
     parts.push(cap);
 
-    // Phillips cross slots on the head face
-    const slotA = new THREE.BoxGeometry(0.072, 0.010, 0.012);
-    slotA.translate(0, 0, 0.126);
+    // Phillips cross slots — wider so the cross reads clearly up close
+    const slotA = new THREE.BoxGeometry(0.090, 0.012, 0.014);
+    slotA.translate(0, 0, 0.135);
     parts.push(slotA);
-    const slotB = new THREE.BoxGeometry(0.010, 0.072, 0.012);
-    slotB.translate(0, 0, 0.126);
+    const slotB = new THREE.BoxGeometry(0.012, 0.090, 0.014);
+    slotB.translate(0, 0, 0.135);
     parts.push(slotB);
 
-    // Bugle head: wide at viewer side (+Z = radiusTop after rotate), narrows to shaft
-    const bugle = new THREE.CylinderGeometry(0.040, 0.016, 0.040, 12);
+    // Bugle head — steeper taper, wider face for a more pronounced screw look
+    const bugle = new THREE.CylinderGeometry(0.052, 0.020, 0.050, 12);
     bugle.rotateX(Math.PI / 2);
-    bugle.translate(0, 0, 0.100);
+    bugle.translate(0, 0, 0.105);
     parts.push(bugle);
 
-    // Shaft body
-    const shaft = new THREE.CylinderGeometry(0.016, 0.016, 0.220, 8);
+    // Shaft — thicker for more visible body
+    const shaft = new THREE.CylinderGeometry(0.020, 0.020, 0.230, 8);
     shaft.rotateX(Math.PI / 2);
     shaft.translate(0, 0, -0.030);
     parts.push(shaft);
 
-    // Thread ridges — more rings, wider, more prominent (clearly a screw not a nail)
+    // Thread ridges — wider radius so they pop against the shaft
     const threadCount = isMobile ? 3 : 6;
     for (let t = 0; t < threadCount; t++) {
-      const ring = new THREE.CylinderGeometry(0.026, 0.026, 0.007, 10);
+      const ring = new THREE.CylinderGeometry(0.032, 0.032, 0.009, 10);
       ring.rotateX(Math.PI / 2);
       ring.translate(0, 0, -0.02 - t * 0.055);
       parts.push(ring);
     }
 
-    // Pointed tip: ConeGeometry tip at +Y → after rotateX(-PI/2) tip is at -Z (into sign)
-    const tip = new THREE.ConeGeometry(0.016, 0.10, 8);
+    // Pointed tip
+    const tip = new THREE.ConeGeometry(0.020, 0.11, 8);
     tip.rotateX(-Math.PI / 2);
-    tip.translate(0, 0, -0.190);
+    tip.translate(0, 0, -0.195);
     parts.push(tip);
 
     return BufferGeometryUtils.mergeGeometries(parts);
@@ -1422,9 +1428,10 @@
      The constant front fill + orbiting lights ensure reflections at all times.     */
   const geo = buildScrewGeo();
   const mat = new THREE.MeshStandardMaterial({
-    metalness: 0.96,
-    roughness: 0.04,
+    metalness: 0.98,
+    roughness: 0.03,
     color: 0xffffff,
+    envMapIntensity: 1.0,
   });
   const mesh = new THREE.InstancedMesh(geo, mat, positions.length);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
