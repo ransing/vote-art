@@ -1273,21 +1273,31 @@
   </script>
   <script type="module">
   import * as THREE from 'three';
-  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
-  /* ---- CANVAS PIXEL SAMPLING ---- */
-  const isMobile = window.innerWidth < 768;
-  const STEP = isMobile ? 7 : 3;
+  /* =====================================================================
+     VOTE SCULPTURE — clean rewrite
+     • No async / no await (was blocking on Google Fonts)
+     • Solid dark background (no transparent canvas issues)
+     • STEP=5 desktop / 9 mobile — proven reliable density
+     • Thick strokes via strokeText so letters are wide
+     • Silver screws with strong constant + orbiting lights
+     ===================================================================== */
 
+  const isMobile = window.innerWidth < 768;
+  const STEP = isMobile ? 9 : 5;
+
+  // --- Sample pixels to get screw positions ---
+  // strokeText + fillText: thick strokes make letter bodies wider and denser
   const offCanvas = document.createElement('canvas');
   offCanvas.width = 900; offCanvas.height = 220;
   const ctx = offCanvas.getContext('2d');
-  ctx.font = 'bold 170px Arial, sans-serif';
+  ctx.clearRect(0, 0, 900, 220);
+  ctx.font = 'bold 160px Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 22;
+  ctx.lineWidth = 24;
   ctx.lineJoin = 'round';
   ctx.strokeText('VOTE', 450, 110);
   ctx.fillStyle = 'white';
@@ -1309,103 +1319,102 @@
     }
   }
 
-  /* ---- DRYWALL SCREW GEOMETRY (Z-axis: head at +Z toward viewer, tip at -Z into sign) ----
-     CylinderGeometry(radiusTop, radiusBottom, height) default along Y.
-     rotateX(PI/2) maps +Y → +Z  (toward viewer), so radiusTop ends up at +Z.
-     rotateX(-PI/2) on the cone maps tip (+Y) → -Z (into sign).                           */
+  // --- Screw geometry: head toward viewer (+Z), tip into sign (-Z) ---
   function buildScrewGeo() {
     const parts = [];
 
-    // Flat head cap — wider for more visual mass
-    const cap = new THREE.CylinderGeometry(0.052, 0.052, 0.007, 12);
+    // Head cap (flat face the viewer sees)
+    const cap = new THREE.CylinderGeometry(0.046, 0.046, 0.008, 10);
     cap.rotateX(Math.PI / 2);
-    cap.translate(0, 0, 0.130);
+    cap.translate(0, 0, 0.125);
     parts.push(cap);
 
-    // Phillips cross slots — wider so the cross reads clearly up close
-    const slotA = new THREE.BoxGeometry(0.090, 0.012, 0.014);
-    slotA.translate(0, 0, 0.135);
+    // Phillips cross
+    const slotA = new THREE.BoxGeometry(0.082, 0.012, 0.014);
+    slotA.translate(0, 0, 0.130);
     parts.push(slotA);
-    const slotB = new THREE.BoxGeometry(0.012, 0.090, 0.014);
-    slotB.translate(0, 0, 0.135);
+    const slotB = new THREE.BoxGeometry(0.012, 0.082, 0.014);
+    slotB.translate(0, 0, 0.130);
     parts.push(slotB);
 
-    // Bugle head — steeper taper, wider face for a more pronounced screw look
-    const bugle = new THREE.CylinderGeometry(0.052, 0.020, 0.050, 12);
+    // Bugle head (wide at +Z, narrows toward shaft)
+    const bugle = new THREE.CylinderGeometry(0.046, 0.018, 0.048, 10);
     bugle.rotateX(Math.PI / 2);
-    bugle.translate(0, 0, 0.105);
+    bugle.translate(0, 0, 0.101);
     parts.push(bugle);
 
-    // Shaft — thicker for more visible body
-    const shaft = new THREE.CylinderGeometry(0.020, 0.020, 0.230, 8);
+    // Shaft
+    const shaft = new THREE.CylinderGeometry(0.018, 0.018, 0.225, 8);
     shaft.rotateX(Math.PI / 2);
-    shaft.translate(0, 0, -0.030);
+    shaft.translate(0, 0, -0.028);
     parts.push(shaft);
 
-    // Thread ridges — wider radius so they pop against the shaft
-    const threadCount = isMobile ? 3 : 6;
-    for (let t = 0; t < threadCount; t++) {
-      const ring = new THREE.CylinderGeometry(0.032, 0.032, 0.009, 10);
+    // Thread ridges (more on desktop, fewer on mobile for performance)
+    const nThreads = isMobile ? 3 : 5;
+    for (let t = 0; t < nThreads; t++) {
+      const ring = new THREE.CylinderGeometry(0.026, 0.026, 0.008, 8);
       ring.rotateX(Math.PI / 2);
-      ring.translate(0, 0, -0.02 - t * 0.055);
+      ring.translate(0, 0, -0.02 - t * 0.056);
       parts.push(ring);
     }
 
     // Pointed tip
-    const tip = new THREE.ConeGeometry(0.020, 0.11, 8);
+    const tip = new THREE.ConeGeometry(0.018, 0.10, 7);
     tip.rotateX(-Math.PI / 2);
-    tip.translate(0, 0, -0.195);
+    tip.translate(0, 0, -0.188);
     parts.push(tip);
 
     return BufferGeometryUtils.mergeGeometries(parts);
   }
 
-  /* ---- SCENE ---- */
+  // --- Scene & renderer (solid background — no transparency issues) ---
   const heroSection = document.getElementById('hero');
   const canvas = document.getElementById('hero-canvas');
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   } catch(e) {
     document.getElementById('webgl-fallback').style.display = 'flex';
     canvas.style.display = 'none';
     throw e;
   }
-
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(heroSection.clientWidth, heroSection.clientHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.6;
+  renderer.toneMappingExposure = 1.5;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x010108); // solid dark — screws always visible
+  scene.background = new THREE.Color(0x010108);
 
-  /* Desktop z=11: VOTE fills ~140% of viewport width (slight overflow, camera pans to reveal).
-     Mobile  z=7:  VOTE fills ~95% of viewport height — the word is giant, extends off sides.  */
+  // Load background image as a faint plane inside Three.js
+  new THREE.TextureLoader().load('images/e7c0d310-4777-4e3a-8a6e-3e7e828614d4.jpg', tex => {
+    const bg = new THREE.Mesh(
+      new THREE.PlaneGeometry(260, 160),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.10 })
+    );
+    bg.position.z = -18;
+    bg.renderOrder = -1;
+    scene.add(bg);
+  });
+
   const TARGET_Z = isMobile ? 7 : 11;
   const camera = new THREE.PerspectiveCamera(45, heroSection.clientWidth / heroSection.clientHeight, 0.1, 200);
   camera.position.set(0, 0, 50);
 
-  // OrbitControls removed — its constructor adds touch listeners that block page scroll.
-  // All camera movement is handled manually in the animate loop.
-
-  /* ---- LIGHTS ----
-     Constant front light ensures every screw always has a bright reflection.
-     Three orbiting lights add sweeping specular flashes on top.            */
+  // --- Lights ---
   scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-  // Fixed camera-aligned key light — always illuminates the viewer-facing heads
+  // Constant front-facing light so screws always reflect toward viewer
   const frontLight = new THREE.DirectionalLight(0xffffff, 2.5);
-  frontLight.position.set(0, 0, 1); // points toward -Z, straight into screws
+  frontLight.position.set(0, 0, 1);
   scene.add(frontLight);
 
-  // Secondary fill from above
   const fillLight = new THREE.DirectionalLight(0xeef4ff, 1.4);
   fillLight.position.set(0, 10, 15);
   scene.add(fillLight);
 
-  // Three orbiting headlights — sweeping specular flashes for the shiny effect
+  // Three orbiting headlights for sweeping specular flashes
   const orbitLights = [
     new THREE.DirectionalLight(0xffffff, 4.5),
     new THREE.DirectionalLight(0xaad4ff, 3.2),
@@ -1413,19 +1422,12 @@
   ];
   orbitLights.forEach(l => scene.add(l));
 
-  /* ---- INSTANCED MESH ----
-     metalness 0.82 / roughness 0.18 = brushed-metal look — every screw visible
-     at all angles, not just direct-reflection angles like a perfect mirror.
-     vertexColors: true lets patriotic color themes tint each screw while the
-     metallic lighting still reads as metal.                                   */
-  /* Bright chrome silver — high metalness + very low roughness = mirror-like surface.
-     The constant front fill + orbiting lights ensure reflections at all times.     */
+  // --- Instanced mesh: bright chrome silver ---
   const geo = buildScrewGeo();
   const mat = new THREE.MeshStandardMaterial({
-    metalness: 0.98,
-    roughness: 0.03,
+    metalness: 0.95,
+    roughness: 0.05,
     color: 0xffffff,
-    envMapIntensity: 1.0,
   });
   const mesh = new THREE.InstancedMesh(geo, mat, positions.length);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -1434,55 +1436,33 @@
   group.add(mesh);
   scene.add(group);
 
-  /* ---- BACKGROUND IMAGE PLANE ----
-     Load the flag image as a Three.js texture so it always renders behind the
-     screws regardless of CSS stacking or canvas transparency.
-     opacity: 0.12 keeps it very faint so silver screws pop strongly.        */
-  new THREE.TextureLoader().load(
-    'images/e7c0d310-4777-4e3a-8a6e-3e7e828614d4.jpg',
-    tex => {
-      const bgMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(260, 160),
-        new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.12 })
-      );
-      bgMesh.position.z = -18;
-      bgMesh.renderOrder = -1;
-      scene.add(bgMesh);
-    }
-  );
-
-  /* ---- INITIALISE ALL MATRICES (one-time pass) ---- */
+  // Initialise all matrices once
   const dummy = new THREE.Object3D();
   for (let i = 0; i < positions.length; i++) {
-    const p = positions[i];
-    dummy.position.set(p.x, p.y, p.origZ);
+    dummy.position.set(positions[i].x, positions[i].y, 0);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
   }
   mesh.instanceMatrix.needsUpdate = true;
 
-  /* ---- INPUT ----
-     Desktop: track real mouse NDC.
-     Mobile:  no touch listeners (so single-finger swipe scrolls the page freely);
-              the animate() loop injects an auto-sweep NDC instead.               */
+  // --- Mouse (desktop only; mobile uses auto-sweep, no touch listeners) ---
   let mouseNDC = null;
   const raycaster = new THREE.Raycaster();
   const _hit = new THREE.Vector3();
   const _inv = new THREE.Matrix4();
-
   if (!isMobile) {
     canvas.addEventListener('mousemove', e => {
       const r = canvas.getBoundingClientRect();
-      mouseNDC = { x: ((e.clientX - r.left) / r.width)  * 2 - 1,
-                   y: -((e.clientY - r.top)  / r.height) * 2 + 1 };
+      mouseNDC = { x: ((e.clientX - r.left) / r.width) * 2 - 1,
+                   y: -((e.clientY - r.top) / r.height) * 2 + 1 };
     });
     canvas.addEventListener('mouseleave', () => { mouseNDC = null; });
   }
 
-  /* ---- ANIMATION ---- */
-  const SPRING = 130, DAMP = 3.2, MAX_DISP = 3.0,
-        RIPPLE_R = isMobile ? 1.5 : 2.4,
-        RIPPLE_F = isMobile ? 4.0 : 6.0;
+  // --- Animation ---
+  const SPRING = 130, DAMP = 3.2, MAX_DISP = 3.0;
+  const RIPPLE_R = isMobile ? 1.5 : 2.4;
+  const RIPPLE_F = isMobile ? 4.0 : 6.0;
   let lastTime = 0, cameraEaseActive = true;
 
   function animate(ts) {
@@ -1491,7 +1471,7 @@
     const dt = Math.min(time - lastTime, 0.05);
     lastTime = time;
 
-    /* Camera ease-in from far */
+    // Camera ease-in
     if (cameraEaseActive) {
       camera.position.z = 50 + (TARGET_Z - 50) * (1 - Math.exp(-2.5 * time));
       if (Math.abs(camera.position.z - TARGET_Z) < 0.05) {
@@ -1500,85 +1480,63 @@
       }
     }
 
-    /* Moving headlights sweep across the silver surface */
+    // Orbiting headlights
     const la = time * 0.40;
-    orbitLights[0].position.set(Math.cos(la)        * 22,  7, Math.sin(la)        * 14 + 12);
+    orbitLights[0].position.set(Math.cos(la) * 22, 7, Math.sin(la) * 14 + 12);
     orbitLights[1].position.set(Math.cos(la + 2.09) * 20, -6, Math.sin(la + 2.09) * 12 + 12);
     orbitLights[2].position.set(Math.cos(la + 4.19) * 18, 10, Math.sin(la + 4.19) * 10 + 12);
 
-    /* Breathing */
+    // Breathing
     group.scale.setScalar(1 + 0.05 * Math.sin(time * 1.6));
 
-    /* Gentle rocking — stays within ±60° (120° front arc), never spins away */
+    // Gentle ±60° rocking
     group.rotation.y = (Math.PI / 3) * Math.sin(time * 0.22);
     group.rotation.x = 0.06 * Math.sin(time * 0.33);
-
-    /* Flush group transforms so matrixWorld is current for this frame */
     group.updateMatrixWorld(true);
 
-    /* Resolve active NDC: real mouse on desktop, auto-sweep on mobile.
-       Mobile sweep: slow left-right sine so screws ripple continuously
-       without needing touch (which would steal page-scroll gestures).  */
+    // Resolve interaction point (mouse on desktop, auto-sweep on mobile)
     const activeNDC = isMobile
       ? { x: Math.sin(time * 0.38) * 0.52, y: Math.sin(time * 0.17) * 0.06 }
       : mouseNDC;
 
-    /* active NDC → group-local hit, recomputed every frame */
     let mouseLocal = null;
     if (activeNDC) {
       raycaster.setFromCamera(activeNDC, camera);
-      const wPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-      if (raycaster.ray.intersectPlane(wPlane, _hit)) {
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      if (raycaster.ray.intersectPlane(plane, _hit)) {
         _inv.copy(group.matrixWorld).invert();
         mouseLocal = _hit.clone().applyMatrix4(_inv);
       }
     }
 
-    /* Theme cycling every 12 s */
-    themeT += dt / 12;
-    if (themeT >= 1) { themeT -= 1; themeIdx = (themeIdx + 1) % THEMES.length; }
-    const nextTheme = (themeIdx + 1) % THEMES.length;
-
-    /* Per-screw spring physics — matrices updated only when needed */
-    let matrixDirty = false;
+    // Spring physics
+    let dirty = false;
     for (let i = 0; i < positions.length; i++) {
       const p = positions[i];
-
-      let nearMouse = false;
+      let near = false;
       if (mouseLocal) {
         const d = Math.hypot(p.x - mouseLocal.x, p.y - mouseLocal.y);
-        if (d < RIPPLE_R) {
-          nearMouse = true;
-          p.vz += RIPPLE_F * (1 - d / RIPPLE_R) * dt;
-        }
+        if (d < RIPPLE_R) { near = true; p.vz += RIPPLE_F * (1 - d / RIPPLE_R) * dt; }
       }
-
-      const active = nearMouse || Math.abs(p.dz) > 3e-4 || Math.abs(p.vz) > 3e-4;
-      if (active) {
+      if (near || Math.abs(p.dz) > 3e-4 || Math.abs(p.vz) > 3e-4) {
         p.vz += (-SPRING * p.dz - DAMP * p.vz) * dt;
-        p.dz  = Math.max(-MAX_DISP, Math.min(MAX_DISP, p.dz + p.vz * dt));
+        p.dz = Math.max(-MAX_DISP, Math.min(MAX_DISP, p.dz + p.vz * dt));
         dummy.position.set(p.x, p.y, p.origZ + p.dz);
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
-        matrixDirty = true;
+        dirty = true;
       }
     }
+    if (dirty) mesh.instanceMatrix.needsUpdate = true;
 
-    if (matrixDirty) mesh.instanceMatrix.needsUpdate = true;
-
-    /* Slow left-right camera pan — reveals the parts of the sculpture
-       that extend beyond the viewport edges.
-       Desktop: gentle ±2.5 units.  Mobile: wider ±4 units sweep.    */
-    const panAmt   = isMobile ? 4.0 : 2.5;
-    const panSpeed = isMobile ? 0.19 : 0.11;
-    camera.position.x = Math.sin(time * panSpeed) * panAmt;
+    // Camera pan
+    camera.position.x = Math.sin(time * (isMobile ? 0.19 : 0.11)) * (isMobile ? 4.0 : 2.5);
 
     renderer.render(scene, camera);
   }
 
   requestAnimationFrame(animate);
 
-  /* ---- RESIZE ---- */
   window.addEventListener('resize', () => {
     const w = heroSection.clientWidth, h = heroSection.clientHeight;
     camera.aspect = w / h;
