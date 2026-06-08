@@ -1274,6 +1274,17 @@
     }
 
   })();
+
+  /* ---- AUTO-SCROLL ----
+     After 3 seconds the page gently scrolls to the trivia section so
+     the user knows there is more content below the 3D hero.          */
+  setTimeout(function() {
+    var target = document.getElementById('trivia');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 3000);
+
   </script>
 
   <!-- ===== THREE.JS HERO (ES MODULE) ===== -->
@@ -1298,29 +1309,34 @@
 
   // --- Sample pixels to get screw positions ---
   // strokeText + fillText: thick strokes make letter bodies wider and denser
+  // Canvas 350px tall — 180px font fits with room to spare above/below.
+  // lineWidth=13: thickens strokes without closing the E's inter-bar gaps
+  // (Arial Bold E gaps ≈24px; 13px lineWidth = 6.5px per side → 11px gap remains).
+  // letterSpacing=30px spreads the four letters wide apart.
+  const CW = 900, CH = 350;
   const offCanvas = document.createElement('canvas');
-  offCanvas.width = 900; offCanvas.height = 220;
+  offCanvas.width = CW; offCanvas.height = CH;
   const ctx = offCanvas.getContext('2d');
-  ctx.clearRect(0, 0, 900, 220);
-  ctx.font = 'bold 160px Arial, sans-serif';
-  ctx.letterSpacing = '18px';
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.font = 'bold 180px Arial, sans-serif';
+  ctx.letterSpacing = '30px';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 24;
+  ctx.lineWidth = 13;
   ctx.lineJoin = 'round';
-  ctx.strokeText('VOTE', 450, 110);
+  ctx.strokeText('VOTE', CW / 2, CH / 2);
   ctx.fillStyle = 'white';
-  ctx.fillText('VOTE', 450, 110);
-  const pixels = ctx.getImageData(0, 0, 900, 220).data;
+  ctx.fillText('VOTE', CW / 2, CH / 2);
+  const pixels = ctx.getImageData(0, 0, CW, CH).data;
 
   const positions = [];
-  for (let y = 0; y < 220; y += STEP) {
-    for (let x = 0; x < 900; x += STEP) {
-      if (pixels[((y * 900) + x) * 4 + 3] > 128) {
+  for (let y = 0; y < CH; y += STEP) {
+    for (let x = 0; x < CW; x += STEP) {
+      if (pixels[((y * CW) + x) * 4 + 3] > 128) {
         positions.push({
-          x: (x / 900 - 0.5) * 22,
-          y: -(y / 220 - 0.5) * 5.5,
+          x: (x / CW - 0.5) * 22,
+          y: -(y / CH - 0.5) * 5.5,
           origZ: 0,
           vz: 0,
           dz: 0
