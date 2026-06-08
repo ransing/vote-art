@@ -515,10 +515,23 @@
     .instagram-embed-wrap {
       max-width: 540px;
       width: 100%;
-      /* Outward shadow in the page background colour — fades the embed into the
-         surrounding background without touching anything inside the frame.      */
+      overflow: hidden;        /* clip the embed to container width on mobile */
       box-shadow: 0 0 70px 55px #06061a;
       border-radius: 4px;
+    }
+
+    /* Override Instagram's inline min-width:326px so the blockquote
+       shrinks to whatever the container (= screen) width is.        */
+    .instagram-embed-wrap .instagram-media {
+      min-width: 0 !important;
+      width: calc(100% - 2px) !important;
+      max-width: 100% !important;
+    }
+
+    /* The iframe Instagram injects — keep it inside the container */
+    .instagram-embed-wrap iframe {
+      max-width: 100% !important;
+      width: 100% !important;
     }
 
     /* ===== GALLERY ===== */
