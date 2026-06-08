@@ -1163,6 +1163,8 @@
       counterEl.textContent = seen.length + ' of ' + TRIVIA.length + ' questions seen';
     }
 
+    var quizStarted = false; // track first-ever answer as "quiz_start"
+
     function handleAnswer(chosen, q, clickedBtn) {
       var optionsEl = document.getElementById('trivia-options');
       var factEl = document.getElementById('trivia-fact');
@@ -1185,6 +1187,22 @@
 
       factEl.classList.add('visible');
       nextBtn.classList.add('visible');
+
+      // --- GA4 events ---
+      if (typeof gtag === 'function') {
+        // First-ever answer = quiz engagement start
+        if (!quizStarted) {
+          quizStarted = true;
+          gtag('event', 'quiz_start', { event_category: 'Quiz' });
+        }
+        // Every answer
+        gtag('event', 'quiz_answer', {
+          event_category: 'Quiz',
+          question: q.q.substring(0, 100),
+          answer_correct: correct,
+          answer_chosen: q.opts[chosen]
+        });
+      }
     }
 
     function fireConfetti() {
@@ -1284,6 +1302,56 @@
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, 3000);
+
+  /* ---- GA4 CUSTOM EVENT TRACKING ----
+
+     Events visible in Google Analytics → Reports → Engagement → Events
+
+     instagram_click   — user clicks anywhere inside the Instagram embed section
+     resource_click    — user clicks a link in the Voting Resources section
+                         (label = resource name, value = destination URL)
+     outbound_click    — any other external link on the page
+  ------------------------------------------------------------------- */
+  (function() {
+    if (typeof gtag !== 'function') return;
+
+    // Instagram embed section click
+    var igSection = document.getElementById('instagram-section');
+    if (igSection) {
+      igSection.addEventListener('click', function() {
+        gtag('event', 'instagram_click', {
+          event_category: 'Engagement',
+          event_label: 'Instagram embed section'
+        });
+      });
+    }
+
+    // Resource card clicks
+    document.querySelectorAll('#resources .resource-card a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        var nameEl = link.querySelector('.resource-card-name');
+        gtag('event', 'resource_click', {
+          event_category: 'Resources',
+          event_label: nameEl ? nameEl.textContent.trim() : link.href,
+          event_url: link.href
+        });
+      });
+    });
+
+    // General outbound link clicks (footer share links, viraj.info, byline, etc.)
+    document.querySelectorAll('a[href^="http"]').forEach(function(link) {
+      // Skip resource cards (already tracked above) and Instagram section
+      if (link.closest('#resources') || link.closest('#instagram-section')) return;
+      link.addEventListener('click', function() {
+        gtag('event', 'outbound_click', {
+          event_category: 'Outbound',
+          event_label: link.textContent.trim() || link.href,
+          event_url: link.href
+        });
+      });
+    });
+
+  })();
 
   </script>
 
